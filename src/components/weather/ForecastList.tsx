@@ -2,12 +2,14 @@ import { FC } from 'react';
 import type { DailyForecast } from '../../types/weather';
 import { ForecastRow } from './ForecastRow';
 import { Calendar } from 'lucide-react';
+import type { TemperatureUnit } from '../../lib/format';
 
 interface ForecastListProps {
   daily: DailyForecast[];
+  unit?: TemperatureUnit;
 }
 
-export const ForecastList: FC<ForecastListProps> = ({ daily }) => {
+export const ForecastList: FC<ForecastListProps> = ({ daily, unit = 'celsius' }) => {
   if (daily.length === 0) {
     return null;
   }
@@ -56,6 +58,7 @@ export const ForecastList: FC<ForecastListProps> = ({ daily }) => {
             index={index}
             globalMin={globalMin}
             globalMax={globalMax}
+            unit={unit}
           />
         ))}
       </div>

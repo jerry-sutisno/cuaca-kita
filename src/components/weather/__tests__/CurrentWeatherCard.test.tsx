@@ -40,7 +40,7 @@ describe('CurrentWeatherCard', () => {
     expect(screen.getByText('31')).toBeInTheDocument();
     expect(screen.getByText('°C')).toBeInTheDocument();
     expect(screen.getByText('Berawan tebal')).toBeInTheDocument();
-    expect(screen.getByText('Pembaruan Langsung')).toBeInTheDocument();
+    expect(screen.getByText(/Diperbarui pukul/i)).toBeInTheDocument();
   });
 
   it('merender pill suhu maksimum dan minimum dari data prakiraan', () => {

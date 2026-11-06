@@ -1,10 +1,13 @@
 import { FC } from 'react';
 import type { City } from '../../types/weather';
 import { SearchBar } from '../search/SearchBar';
+import { RecentChips } from '../search/RecentChips';
 import { Calendar, AlertTriangle, Wind, Sun, CloudSun } from 'lucide-react';
 
 interface EmptyStateProps {
   onSelectCity: (city: City) => void;
+  recentCities?: City[];
+  onClearRecent?: () => void;
 }
 
 const POPULAR_CITIES: City[] = [
@@ -55,7 +58,11 @@ const POPULAR_CITIES: City[] = [
   },
 ];
 
-export const EmptyState: FC<EmptyStateProps> = ({ onSelectCity }) => {
+export const EmptyState: FC<EmptyStateProps> = ({
+  onSelectCity,
+  recentCities = [],
+  onClearRecent,
+}) => {
   return (
     <div className="relative w-full overflow-hidden py-8 sm:py-12 px-4 flex flex-col items-center justify-center">
       {/* Ambient Atmospheric Glows */}
@@ -85,6 +92,15 @@ export const EmptyState: FC<EmptyStateProps> = ({ onSelectCity }) => {
         <div className="w-full max-w-[680px] mt-8">
           <SearchBar onSelectCity={onSelectCity} autoFocus />
         </div>
+
+        {/* Recent Search Chips (FR-18) */}
+        {recentCities.length > 0 && (
+          <RecentChips
+            cities={recentCities}
+            onSelectCity={onSelectCity}
+            onClear={onClearRecent}
+          />
+        )}
 
         {/* Popular City Suggestions Chips */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">

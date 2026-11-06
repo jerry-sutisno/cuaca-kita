@@ -1,21 +1,38 @@
 import { FC } from 'react';
 import type { WeatherReport } from '../../types/weather';
 import { getWeatherCodeInfo } from '../../lib/weatherCodes';
-import { formatCurrentDateTime, formatTemperature } from '../../lib/format';
+import {
+  formatCurrentDateTime,
+  formatTemperature,
+  formatLocalTime,
+  type TemperatureUnit,
+} from '../../lib/format';
 import { WeatherIcon } from './WeatherIcon';
-import { MapPin, Info, ArrowUp, ArrowDown } from 'lucide-react';
+import { MapPin, Info, ArrowUp, ArrowDown, Clock } from 'lucide-react';
 
 interface CurrentWeatherCardProps {
   report: WeatherReport;
+  unit?: TemperatureUnit;
 }
 
-export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({ report }) => {
+export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({
+  report,
+  unit = 'celsius',
+}) => {
   const { city, current, daily } = report;
   const weatherInfo = getWeatherCodeInfo(current.weatherCode);
   const todayForecast = daily[0];
 
   const locationText = [city.name, city.admin1].filter(Boolean).join(', ');
   const formattedDateTime = formatCurrentDateTime(current.time);
+  const updatedTime = formatLocalTime(current.time);
+
+  const mainTempValue =
+    unit === 'fahrenheit'
+      ? Math.round((current.temperature * 9) / 5 + 32)
+      : Math.round(current.temperature);
+
+  const unitLabel = unit === 'fahrenheit' ? '°F' : '°C';
 
   return (
     <div className="rounded-3xl p-6 sm:p-8 bg-white/75 dark:bg-slate-900/75 backdrop-blur-md shadow-glass border border-white/70 dark:border-slate-800 relative overflow-hidden flex flex-col justify-between min-h-[380px]">
@@ -29,7 +46,7 @@ export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({ report }) => {
         className="absolute -bottom-24 -left-20 w-80 h-80 rounded-full bg-blue-500/15 dark:bg-blue-500/5 blur-3xl pointer-events-none"
       />
 
-      {/* Top Row: Location & Live Status */}
+      {/* Top Row: Location & Accurate Update Time */}
       <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -43,10 +60,10 @@ export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({ report }) => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white/85 dark:bg-slate-800/85 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-700">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            Pembaruan Langsung
+        <div className="flex items-center gap-2 bg-white/85 dark:bg-slate-800/85 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+          <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" aria-hidden="true" />
+          <span className="text-xs font-medium">
+            Diperbarui pukul {updatedTime}
           </span>
         </div>
       </div>
@@ -65,10 +82,10 @@ export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({ report }) => {
           <div className="flex flex-col">
             <div className="flex items-baseline">
               <span className="text-6xl sm:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white tabular-nums leading-none">
-                {Math.round(current.temperature)}
+                {mainTempValue}
               </span>
               <span className="text-3xl sm:text-4xl font-bold text-primary ml-1">
-                °C
+                {unitLabel}
               </span>
             </div>
             <span className="text-xl sm:text-2xl font-semibold text-slate-800 dark:text-slate-200 mt-1">
@@ -83,16 +100,16 @@ export const CurrentWeatherCard: FC<CurrentWeatherCardProps> = ({ report }) => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm">
               <span className="inline-flex items-center text-amber-600 dark:text-amber-400">
                 <ArrowUp className="w-4 h-4 mr-0.5" />
-                Maks: {formatTemperature(todayForecast.tempMax)}
+                Maks: {formatTemperature(todayForecast.tempMax, unit)}
               </span>
               <span className="text-slate-300 dark:text-slate-600">·</span>
               <span className="inline-flex items-center text-sky-600 dark:text-sky-400">
                 <ArrowDown className="w-4 h-4 mr-0.5" />
-                Min: {formatTemperature(todayForecast.tempMin)}
+                Min: {formatTemperature(todayForecast.tempMin, unit)}
               </span>
             </div>
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Terasa seperti {formatTemperature(current.feelsLike)}
+              Terasa seperti {formatTemperature(current.feelsLike, unit)}
             </span>
           </div>
         )}

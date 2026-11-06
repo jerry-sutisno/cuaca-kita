@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { getWeather } from '../weather';
 import { searchCities } from '../geocoding';
 
-describe('Live API Integration (Open-Meteo)', () => {
+describe('Live API Integration (Open-Meteo)', { timeout: 15000 }, () => {
   it('pemanggilan getWeather untuk Jakarta mengembalikan WeatherReport valid', async () => {
     const report = await getWeather({
       id: 1642911,

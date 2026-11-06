@@ -1,7 +1,11 @@
 import { FC } from 'react';
 import type { DailyForecast } from '../../types/weather';
 import { getWeatherCodeInfo } from '../../lib/weatherCodes';
-import { formatForecastDay, formatTemperature } from '../../lib/format';
+import {
+  formatForecastDay,
+  formatTemperature,
+  type TemperatureUnit,
+} from '../../lib/format';
 import { WeatherIcon } from './WeatherIcon';
 import { Droplets } from 'lucide-react';
 
@@ -10,6 +14,7 @@ interface ForecastRowProps {
   index: number;
   globalMin: number;
   globalMax: number;
+  unit?: TemperatureUnit;
 }
 
 const MONTH_NAMES_SHORT = [
@@ -32,6 +37,7 @@ export const ForecastRow: FC<ForecastRowProps> = ({
   index,
   globalMin,
   globalMax,
+  unit = 'celsius',
 }) => {
   const dayName = formatForecastDay(forecast.date, index);
   const weatherInfo = getWeatherCodeInfo(forecast.weatherCode);
@@ -86,7 +92,7 @@ export const ForecastRow: FC<ForecastRowProps> = ({
       {/* Temperature Range Bar */}
       <div className="flex items-center gap-3 w-full sm:w-56 shrink-0">
         <span className="text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 w-8 text-right tabular-nums">
-          {formatTemperature(forecast.tempMin)}
+          {formatTemperature(forecast.tempMin, unit)}
         </span>
         <div className="flex-1 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden relative">
           <div
@@ -98,7 +104,7 @@ export const ForecastRow: FC<ForecastRowProps> = ({
           />
         </div>
         <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 w-8 text-left tabular-nums">
-          {formatTemperature(forecast.tempMax)}
+          {formatTemperature(forecast.tempMax, unit)}
         </span>
       </div>
     </div>

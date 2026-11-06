@@ -72,6 +72,16 @@ const NAMA_BULAN_PENDEK = [
 ];
 
 /**
+ * Format jam dan menit waktu lokal kota dari ISO (mis. "2026-11-06T14:00" -> "14.00")
+ */
+export function formatLocalTime(isoTime: string): string {
+  const { hour, minute } = parseLocalIso(isoTime);
+  const formattedHour = String(hour).padStart(2, '0');
+  const formattedMinute = String(minute).padStart(2, '0');
+  return `${formattedHour}.${formattedMinute}`;
+}
+
+/**
  * Format waktu lokal kota dari ISO (mis. "2026-11-06T14:00" -> "Jumat, 6 Nov · 14.00")
  */
 export function formatCurrentDateTime(isoTime: string): string {

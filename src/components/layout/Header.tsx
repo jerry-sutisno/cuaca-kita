@@ -1,11 +1,15 @@
 import { FC, ReactNode } from 'react';
 import { Sun, Moon, CloudSun } from 'lucide-react';
 import type { Theme } from '../../hooks/useTheme';
+import type { TemperatureUnit } from '../../lib/format';
+import { UnitToggle } from './UnitToggle';
 
 interface HeaderProps {
   theme: Theme;
   onToggleTheme: () => void;
   onResetToHome?: () => void;
+  unit?: TemperatureUnit;
+  onChangeUnit?: (unit: TemperatureUnit) => void;
   children?: ReactNode; // Untuk SearchBar di header jika di layar hasil
 }
 
@@ -13,6 +17,8 @@ export const Header: FC<HeaderProps> = ({
   theme,
   onToggleTheme,
   onResetToHome,
+  unit,
+  onChangeUnit,
   children,
 }) => {
   return (
@@ -45,8 +51,12 @@ export const Header: FC<HeaderProps> = ({
           </div>
         )}
 
-        {/* Right actions: Theme toggle */}
-        <div className="flex items-center gap-3">
+        {/* Right actions: Unit Switcher & Theme toggle */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {unit && onChangeUnit && (
+            <UnitToggle unit={unit} onChangeUnit={onChangeUnit} />
+          )}
+
           <button
             type="button"
             onClick={onToggleTheme}

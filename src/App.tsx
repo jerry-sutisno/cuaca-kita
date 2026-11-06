@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { useWeather } from './hooks/useWeather';
 import { useTheme } from './hooks/useTheme';
+import { useRecentCities } from './hooks/useRecentCities';
+import { useTemperatureUnit } from './hooks/useTemperatureUnit';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { SearchBar } from './components/search/SearchBar';
@@ -12,46 +14,35 @@ import { SkeletonResult } from './components/states/SkeletonResult';
 import { NotFoundState } from './components/states/NotFoundState';
 import { ErrorState } from './components/states/ErrorState';
 import { formatHumidity, formatWindSpeed, formatTemperature } from './lib/format';
+import type { City } from './types/weather';
 import { Droplets, Wind, Thermometer } from 'lucide-react';
 
 export default function App() {
-  const { viewState, fetchWeatherForCity, searchAndFetchCity, resetToIdle } = useWeather();
+  const { viewState, fetchWeatherForCity, resetToIdle } = useWeather();
   const { theme, toggleTheme } = useTheme();
+  const { recentCities, addRecentCity, clearRecentCities } = useRecentCities();
+  const { unit, setUnit } = useTemperatureUnit();
 
-  // Sinkronisasi parameter ?q= di URL pada saat muat awal
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get('q');
-    if (query && query.trim().length >= 2) {
-      searchAndFetchCity(query.trim());
-    }
-  }, [searchAndFetchCity]);
-
-  // Perbarui parameter URL saat sukses memilih kota
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (viewState.status === 'success') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('q', viewState.report.city.name);
-      window.history.replaceState({}, '', url.toString());
-    } else if (viewState.status === 'idle') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('q');
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [viewState]);
+  const handleSelectCity = useCallback(
+    (city: City) => {
+      addRecentCity(city);
+      fetchWeatherForCity(city);
+    },
+    [addRecentCity, fetchWeatherForCity]
+  );
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-blue-100 selection:text-primary">
-      {/* Header dengan tombol tema dan pencarian saat tidak di beranda */}
+      {/* Header dengan tombol tema, pilihan satuan temperatur, dan pencarian */}
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
         onResetToHome={resetToIdle}
+        unit={unit}
+        onChangeUnit={setUnit}
       >
         {viewState.status !== 'idle' && (
-          <SearchBar onSelectCity={fetchWeatherForCity} />
+          <SearchBar onSelectCity={handleSelectCity} />
         )}
       </Header>
 
@@ -59,7 +50,11 @@ export default function App() {
       <main className="flex-1 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 w-full py-6 sm:py-8">
         {/* State: IDLE */}
         {viewState.status === 'idle' && (
-          <EmptyState onSelectCity={fetchWeatherForCity} />
+          <EmptyState
+            onSelectCity={handleSelectCity}
+            recentCities={recentCities}
+            onClearRecent={clearRecentCities}
+          />
         )}
 
         {/* State: LOADING */}
@@ -73,14 +68,17 @@ export default function App() {
           >
             {/* Mobile-only Search Bar for convenient quick access */}
             <div className="md:hidden w-full mb-6">
-              <SearchBar onSelectCity={fetchWeatherForCity} />
+              <SearchBar onSelectCity={handleSelectCity} />
             </div>
 
             {/* 12-Column Responsive Bento Layout */}
             <div className="grid grid-cols-12 gap-6 items-stretch">
               {/* Left Column: Hero Current Weather Card (8 Cols desktop) */}
               <div className="col-span-12 lg:col-span-8">
-                <CurrentWeatherCard report={viewState.report} />
+                <CurrentWeatherCard
+                  report={viewState.report}
+                  unit={unit}
+                />
               </div>
 
               {/* Right Column: 3 Stat Cards (4 Cols desktop, 3-col on tablet) */}
@@ -104,7 +102,7 @@ export default function App() {
                 />
                 <StatCard
                   label="Terasa Seperti"
-                  value={formatTemperature(viewState.report.current.feelsLike)}
+                  value={formatTemperature(viewState.report.current.feelsLike, unit)}
                   description={
                     viewState.report.current.feelsLike >
                     viewState.report.current.temperature
@@ -118,7 +116,7 @@ export default function App() {
             </div>
 
             {/* Bottom: 7-Day Forecast */}
-            <ForecastList daily={viewState.report.daily} />
+            <ForecastList daily={viewState.report.daily} unit={unit} />
           </div>
         )}
 
@@ -126,7 +124,7 @@ export default function App() {
         {viewState.status === 'not-found' && (
           <NotFoundState
             query={viewState.query}
-            onSelectCity={fetchWeatherForCity}
+            onSelectCity={handleSelectCity}
           />
         )}
 
