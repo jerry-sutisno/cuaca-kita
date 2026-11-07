@@ -2,10 +2,7 @@
 
 Website untuk cek cuaca suatu kota. Ketik nama kota, pilih dari saran yang muncul, lalu lihat kondisi cuaca saat ini dan prakiraan 7 hari ke depan.
 
-Demo: [LINK VERCEL LU]
-
-![Tampilan desktop](docs/screenshot-desktop.png)
-![Tampilan mobile](docs/screenshot-mobile.png)
+Demo: (https://cuaca-kita.vercel.app/)
 
 ## Fitur
 
